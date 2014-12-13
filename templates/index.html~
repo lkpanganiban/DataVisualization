@@ -16,8 +16,9 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 
 <!--d3 and topojson-->
-<script src="../static/js/d3.min.js"></script>
-<script src="../static/js/topojson.v0.min.js"></script>
+<script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/topojson.v0.min.js') }}"></script>
+
 
 <!--container elements-->
 <style>
@@ -25,7 +26,7 @@
 		position:absolute;
 		left:5rem;
 		margin-top:5rem;
-		height:20rem;
+		height:50rem;
 		width:20rem;
 		z-index:500;
 	}
@@ -98,7 +99,14 @@
 			var g = svg.append("g");
 
 			//Parse topojson data to get geometries
-			var regions = d3.json("../static/json/Regions003.json",function(error, topology){
+			var regions = d3.json("json/Regions003.json",function(error, topology){
+				function scale(domain,range){
+					var linearS = d3.scale.linear()
+									.domain(domain)
+									.range(range);
+					return linearS; 
+
+				};
 
 				//Parse CSV construction data 
 				d3.csv("../static/data/construction.csv",function(error,data){
@@ -115,22 +123,15 @@
 							return projection([d.LON,d.LAT])[1];
 						})
 						.attr("r",function(d){
-							var linearS = d3.scale.linear()
-									.domain([53,7892])
-									.range([10,30]);
 
-							return linearS(d.CONSTRUC);
+							return scale([53,7892],[10,30])(d.CONSTRUC);
 						})
 						.style("fill",function(d){
-							var linearS = d3.scale.linear()
-									.domain([53,7892])
-									.range([0,1]);
-
 							var color = d3.scale.linear()
     								.domain([0,0.5,1])
     								.range(["yellow", "orange", "red"]);
 
-    							return color(linearS(d.CONSTRUC));
+    							return color(scale([53,7892],[0,1])(d.CONSTRUC));
 						})
 						.style("opacity","0.5")
 						.style("stroke","#E5EF2C")
@@ -141,11 +142,8 @@
 						.on('mouseover',function(d){
 							d3.select(this)
 							    .transition().attr("r", function(){
-							   		var linearS = d3.scale.linear()
-										.domain([53,7892])
-										.range([13,33]);
 
-										return linearS(d.CONSTRUC);
+										return scale([53,7892],[13,33])(d.CONSTRUC);
 							    })
 							    .duration(500)
 								.style("stroke","#105770")
@@ -159,26 +157,19 @@
 								})
 								.attr("class", "percent")
 								.style("font-size",function(){				
-									var linearS = d3.scale.linear()
-										.domain([53,7892])
-										.range([5,15]);
 
-									return linearS(d.CONSTRUC);
+									return scale([53,7892],[5,15])(d.CONSTRUC);
 								})
 								.style("fill","black")
 								.attr("x", projection([d.LON,d.LAT])[0]-5)
      							.attr("y", projection([d.LON,d.LAT])[1]-5)
      							.attr("dx", function(){
-     								var linearS = d3.scale.linear()
-										.domain([53,7892])
-										.range([0,15]);
-     								return -linearS(d.CONSTRUC);
+
+     								return -scale([53,7892],[0,15])(d.CONSTRUC);
      							})
      							.attr("dy", function(){
-     								var linearS = d3.scale.linear()
-										.domain([53,7892])
-										.range([6,12]);
-     								return +linearS(d.CONSTRUC);
+
+     								return +scale([53,7892],[6,12])(d.CONSTRUC);
      							})
      							.attr("fill",  "black");
 
@@ -186,11 +177,8 @@
 						.on('mouseleave', function(d){
 							d3.select(this)
 								.transition().attr("r", function(){
-							   		var linearS = d3.scale.linear()
-										.domain([53,7892])
-										.range([10,30]);
 
-										return linearS(d.CONSTRUC);
+										return scale([53,7892],[10,30])(d.CONSTRUC);
 							    })
 							    .duration(400)
 								.style("stroke","#E5EF2C")
